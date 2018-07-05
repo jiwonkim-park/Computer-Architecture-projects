@@ -1,0 +1,50 @@
+# Initial code
+	irmovq Stack,%rsp
+	irmovq $3,%rdx
+	irmovq dest,%rsi
+	irmovq src,%rdi
+	call copy_block
+	halt
+
+.align 8
+# Source array
+src:
+	.quad 0x00a
+	.quad 0x0b0
+	.quad 0xc00
+
+# Destination array
+dest:
+	.quad 0x111
+	.quad 0x222
+	.quad 0x333
+
+# long copy_block(long *src, long *dest, long len)
+# src in %rdi, dest in %rsi, len in %rdx
+copy_block:
+	# FILL IN HEREnm
+	pushq %rbx
+	pushq %r12		# push %r12 : for immediate value 8
+	pushq %r13		# push %r13 : for immediate value 1
+	irmovq $8,%r12		# move $8 to %r12
+	irmovq $1,%r13		# move $1 to %r12
+	irmovq $0,%rax		# result = 0
+	andq %rdx,%rdx		# len&len : check whether 0 or not
+	jmp test
+loop:
+	mrmovq (%rdi),%rbx	# val = *src++
+	rmmovq %rbx,(%rsi)	# *dest++ = val
+	xorq %rbx,%rax		# result ^= val
+	addq %r12,%rdi		# src++
+	addq %r12,%rsi		# dest++
+	subq %r13,%rdx		# len--
+	andq %rdx,%rdx		# len & len : check whether 0 or not
+test:
+	jg loop			# if len > 0 goto loop
+	popq %r13		# pop %r13
+	popq %r12		# pop %r12
+	popq %rbx		# pop %rbx
+	ret			# return
+
+.pos 0x100
+Stack:
